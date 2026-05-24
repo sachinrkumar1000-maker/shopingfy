@@ -2,15 +2,617 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Home</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopinglify</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --black:   #0f0f0f;
+      --white:   #ffffff;
+      --gray:    #f4f4f2;
+      --mid:     #e8e8e4;
+      --text:    #1a1a1a;
+      --muted:   #888;
+      --accent:  #0f0f0f;
+      --green:   #1a7a4a;
+      --red:     #d63031;
+      --gold:    #e6a817;
+      --radius:  999px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--white);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--mid);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-size: 1.7rem;
+      color: var(--black);
+      letter-spacing: -0.5px;
+      user-select: none;
+    }
+
+    .logo span { color: #555; font-weight: 700; }
+
+    .nav-actions {
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .nav-icon-btn {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1.5px solid var(--mid);
+      background: var(--white);
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center;
+      transition: border-color .18s, background .18s, transform .15s;
+      position: relative;
+    }
+    .nav-icon-btn:hover {
+      border-color: var(--black);
+      background: var(--gray);
+      transform: scale(1.07);
+    }
+    .nav-icon-btn svg { width:18px; height:18px; stroke:var(--text); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+
+    .cart-count {
+      position: absolute; top:-4px; right:-4px;
+      background: var(--black); color: #fff;
+      font-size: 0.6rem; font-weight: 700;
+      width: 16px; height: 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid #fff;
+      display: none;
+    }
+    .cart-count.visible { display: flex; }
+
+    /* ── HERO / SEARCH ── */
+    .hero {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 72px 24px 56px;
+      background: linear-gradient(170deg, #fafafa 60%, #f0f0ed 100%);
+      text-align: center;
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--black); color: #fff;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 999px;
+      margin-bottom: 22px;
+    }
+    .hero-tag span { width:6px;height:6px;border-radius:50%;background:#6ee7b7;display:inline-block; animation: blink 1.4s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.06;
+      color: var(--black);
+      letter-spacing: -1.5px;
+      margin-bottom: 14px;
+    }
+    .hero h1 em { font-style: italic; color: #444; }
+
+    .hero p {
+      font-size: 1.05rem; color: var(--muted); font-weight: 400;
+      max-width: 440px; line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    /* search bar */
+    .search-wrap {
+      width: 100%; max-width: 560px;
+      position: relative;
+    }
+    .search-wrap input {
+      width: 100%;
+      padding: 18px 60px 18px 28px;
+      border-radius: var(--radius);
+      border: 2px solid var(--mid);
+      background: var(--white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem; font-weight: 400;
+      color: var(--text);
+      outline: none;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-wrap input::placeholder { color: #bbb; }
+    .search-wrap input:focus {
+      border-color: var(--black);
+      box-shadow: 0 6px 32px rgba(0,0,0,0.12);
+    }
+    .search-btn {
+      position: absolute; right: 8px; top: 50%;
+      transform: translateY(-50%);
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--black); border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .18s, transform .15s;
+    }
+    .search-btn:hover { background: #333; transform: translateY(-50%) scale(1.08); }
+    .search-btn svg { width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round; }
+
+    /* ── FILTER PILLS ── */
+    .filters {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      justify-content: center;
+      padding: 0 24px 28px;
+      background: linear-gradient(0deg, #f0f0ed, #f0f0ed);
+    }
+
+    .pill {
+      padding: 7px 18px; border-radius: 999px;
+      border: 1.5px solid var(--mid);
+      background: var(--white);
+      font-size: 0.82rem; font-weight: 500;
+      cursor: pointer; transition: all .15s;
+      color: var(--muted);
+    }
+    .pill:hover { border-color: var(--black); color: var(--black); }
+    .pill.active { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    /* ── SECTION ── */
+    .section {
+      max-width: 1280px; margin: 0 auto;
+      padding: 48px 32px 64px;
+    }
+
+    .section-header {
+      display: flex; align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .section-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem; font-weight: 900;
+      letter-spacing: -0.5px;
+    }
+    .section-header a {
+      font-size: 0.85rem; font-weight: 600;
+      color: var(--muted); text-decoration: none;
+      border-bottom: 1px solid var(--mid);
+      transition: color .15s, border-color .15s;
+    }
+    .section-header a:hover { color: var(--black); border-color: var(--black); }
+
+    /* ── PRODUCT GRID ── */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .product-card {
+      background: var(--white);
+      border: 1.5px solid var(--mid);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: transform .22s ease, box-shadow .22s ease, border-color .22s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 16px 48px rgba(0,0,0,0.1);
+      border-color: #ccc;
+    }
+
+    .product-img-wrap {
+      position: relative;
+      height: 220px; overflow: hidden;
+      background: var(--gray);
+    }
+    .product-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform .32s ease;
+    }
+    .product-card:hover .product-img-wrap img { transform: scale(1.06); }
+
+    .badge {
+      position: absolute; top: 12px; left: 12px;
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 0.67rem; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .badge.Sale  { background: var(--red);  color:#fff; }
+    .badge.Hot   { background: var(--gold); color:#fff; }
+    .badge.New   { background: var(--green);color:#fff; }
+
+    .wish-btn {
+      position: absolute; top: 10px; right: 10px;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      border: 1.5px solid var(--mid);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s;
+    }
+    .wish-btn:hover { background: #fff; border-color: var(--red); }
+    .wish-btn svg { width:16px;height:16px;stroke:#999;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round; transition: stroke .15s, fill .15s; }
+    .wish-btn.active svg { stroke:var(--red); fill:var(--red); }
+
+    .product-info { padding: 16px 18px 18px; }
+
+    .product-cat {
+      font-size: 0.7rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); margin-bottom: 5px;
+    }
+
+    .product-name {
+      font-size: 0.97rem; font-weight: 600;
+      color: var(--text); line-height: 1.35;
+      margin-bottom: 8px;
+    }
+
+    .stars {
+      display: flex; align-items: center; gap: 4px;
+      margin-bottom: 12px;
+    }
+    .stars span { font-size: 0.75rem; color: var(--muted); }
+
+    .star-icon { color: var(--gold); font-size: 0.8rem; }
+
+    .price-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 14px;
+    }
+    .price { font-size: 1.1rem; font-weight: 700; color: var(--black); }
+    .original-price { font-size: 0.82rem; color: #bbb; text-decoration: line-through; }
+
+    .card-actions {
+      display: flex; gap: 8px;
+    }
+
+    .btn-cart {
+      flex: 1; padding: 10px 0; border-radius: 999px;
+      background: var(--black); color: #fff;
+      border: none; font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: background .15s, transform .12s;
+    }
+    .btn-cart:hover { background: #333; transform: scale(1.03); }
+    .btn-cart:active { transform: scale(0.97); }
+
+    .btn-buy {
+      padding: 10px 16px; border-radius: 999px;
+      background: var(--white); color: var(--black);
+      border: 1.5px solid var(--mid);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; transition: all .15s;
+      white-space: nowrap;
+    }
+    .btn-buy:hover { border-color: var(--black); background: var(--gray); }
+
+    /* ── TOAST ── */
+    #toast-stack {
+      position: fixed; bottom: 28px; right: 28px;
+      display: flex; flex-direction: column-reverse; gap: 10px;
+      z-index: 999; pointer-events: none;
+    }
+
+    .toast {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--black); color: #fff;
+      padding: 12px 20px; border-radius: 14px;
+      font-size: 0.85rem; font-weight: 500;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.18);
+      animation: toastIn .22s ease forwards;
+      pointer-events: auto;
+      max-width: 300px;
+    }
+    .toast.out { animation: toastOut .2s ease forwards; }
+    .toast-icon { font-size: 1.1rem; flex-shrink: 0; }
+    @keyframes toastIn  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes toastOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(12px)} }
+
+    /* ── SKELETON ── */
+    .skeleton {
+      background: linear-gradient(90deg, var(--gray) 25%, #e8e8e4 50%, var(--gray) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 12px;
+    }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    .skel-card { border-radius: 20px; border: 1.5px solid var(--mid); overflow: hidden; }
+    .skel-img  { height: 220px; }
+    .skel-body { padding: 16px 18px 18px; display:flex;flex-direction:column;gap:10px; }
+    .skel-line { height: 12px; }
+    .skel-line.short { width: 55%; }
+    .skel-line.long  { width: 85%; }
+    .skel-btn  { height: 38px; border-radius: 999px; margin-top: 4px; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 28px;
+      font-size: 0.8rem;
+      color: #bbb;
+      border-top: 1px solid var(--mid);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 20px; }
+      .hero { padding: 48px 20px 40px; }
+      .section { padding: 32px 20px 48px; }
+      .product-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .product-img-wrap { height: 160px; }
+    }
+    @media (max-width: 380px) {
+      .product-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-  <p id="status">Loading...</p>
 
-  <script>
-    fetch("/api/visited", { method: "POST" })
-      .then(() => document.getElementById("status").textContent = "Welcome!")
-      .catch(() => document.getElementById("status").textContent = "Welcome!");
-  </script>
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Shopinglify<span>.</span></div>
+    <div class="nav-actions">
+      <!-- wishlist -->
+      <button class="nav-icon-btn" title="Wishlist" onclick="openWishlist()">
+        <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </button>
+      <!-- cart -->
+      <button class="nav-icon-btn" title="Cart" onclick="openCart()">
+        <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span class="cart-count" id="cartCount">0</span>
+      </button>
+      <!-- profile -->
+      <button class="nav-icon-btn" title="Profile">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag"><span></span> Free shipping on orders over $50</div>
+    <h1>Shop <em>smarter,</em><br>live better.</h1>
+    <p>Curated products, honest prices, and fast delivery — all in one place.</p>
+    <div class="search-wrap">
+      <input type="text" id="searchInput" placeholder="Search for anything…" oninput="filterProducts()">
+      <button class="search-btn" onclick="filterProducts()">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- FILTERS -->
+  <div class="filters" id="filterPills">
+    <button class="pill active" onclick="setFilter('All', this)">All</button>
+    <button class="pill" onclick="setFilter('Electronics', this)">Electronics</button>
+    <button class="pill" onclick="setFilter('Clothing', this)">Clothing</button>
+    <button class="pill" onclick="setFilter('Home', this)">Home</button>
+    <button class="pill" onclick="setFilter('Kitchen', this)">Kitchen</button>
+    <button class="pill" onclick="setFilter('Accessories', this)">Accessories</button>
+    <button class="pill" onclick="setFilter('Outdoors', this)">Outdoors</button>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Featured Products</h2>
+      <a href="#">View all →</a>
+    </div>
+    <div class="product-grid" id="productGrid">
+      <!-- skeletons -->
+      ${[...Array(8)].map(() => `
+        <div class="skel-card">
+          <div class="skel-img skeleton"></div>
+          <div class="skel-body">
+            <div class="skel-line short skeleton"></div>
+            <div class="skel-line long skeleton"></div>
+            <div class="skel-line short skeleton"></div>
+            <div class="skel-btn skeleton"></div>
+          </div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <footer>© 2026 Shopinglify · Made with care</footer>
+
+  <!-- TOAST STACK -->
+  <div id="toast-stack"></div>
+
+<script>
+  const API = "/api";
+  let allProducts  = [];
+  let activeFilter = "All";
+  let cartItems    = JSON.parse(localStorage.getItem("sh_cart")    || "[]");
+  let wishItems    = JSON.parse(localStorage.getItem("sh_wish")    || "[]");
+  let visitorId    = localStorage.getItem("sh_visitor_id") || null;
+
+  // ── visitor ping ──────────────────────────────────────────────────────────
+  fetch(`${API}/visited`, { method: "POST" }).catch(() => {});
+
+  // ── load products ─────────────────────────────────────────────────────────
+  async function loadProducts() {
+    try {
+      const r = await fetch(`${API}/products`);
+      const d = await r.json();
+      allProducts = d.products || [];
+      renderProducts(allProducts);
+      syncCartCount();
+    } catch(e) {
+      document.getElementById("productGrid").innerHTML =
+        `<p style="color:#999;font-size:.9rem;">Could not load products.</p>`;
+    }
+  }
+
+  // ── render ────────────────────────────────────────────────────────────────
+  function renderProducts(list) {
+    const grid = document.getElementById("productGrid");
+    if (!list.length) {
+      grid.innerHTML = `<p style="color:#999;font-size:.9rem;grid-column:1/-1;text-align:center;padding:40px 0;">No products found.</p>`;
+      return;
+    }
+    grid.innerHTML = list.map(p => {
+      const inWish = wishItems.includes(p.id);
+      const stars  = "★".repeat(Math.round(p.rating)) + "☆".repeat(5 - Math.round(p.rating));
+      return `
+      <div class="product-card" data-id="${p.id}">
+        <div class="product-img-wrap">
+          <img src="${p.image}" alt="${esc(p.name)}" loading="lazy">
+          ${p.badge ? `<span class="badge ${p.badge}">${p.badge}</span>` : ""}
+          <button class="wish-btn ${inWish ? 'active' : ''}" onclick="toggleWish(event,'${p.id}')" title="Wishlist">
+            <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+        </div>
+        <div class="product-info">
+          <div class="product-cat">${esc(p.category)}</div>
+          <div class="product-name">${esc(p.name)}</div>
+          <div class="stars">
+            <span class="star-icon">${stars}</span>
+            <span>${p.rating} (${p.reviews})</span>
+          </div>
+          <div class="price-row">
+            <span class="price">$${p.price.toFixed(2)}</span>
+            ${p.originalPrice ? `<span class="original-price">$${p.originalPrice.toFixed(2)}</span>` : ""}
+          </div>
+          <div class="card-actions">
+            <button class="btn-cart" onclick="addToCart('${p.id}')">Add to Cart</button>
+            <button class="btn-buy"  onclick="buyNow('${p.id}')">Buy Now</button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  // ── filter ────────────────────────────────────────────────────────────────
+  function setFilter(cat, el) {
+    activeFilter = cat;
+    document.querySelectorAll(".pill").forEach(p => p.classList.remove("active"));
+    el.classList.add("active");
+    applyFilters();
+  }
+
+  function filterProducts() { applyFilters(); }
+
+  function applyFilters() {
+    const q = document.getElementById("searchInput").value.trim().toLowerCase();
+    let list = allProducts;
+    if (activeFilter !== "All") list = list.filter(p => p.category === activeFilter);
+    if (q) list = list.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+    renderProducts(list);
+  }
+
+  // ── wishlist ──────────────────────────────────────────────────────────────
+  function toggleWish(e, pid) {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const inWish = wishItems.includes(pid);
+
+    if (inWish) {
+      wishItems = wishItems.filter(x => x !== pid);
+      btn.classList.remove("active");
+      toast("💛", "Removed from wishlist");
+    } else {
+      wishItems.push(pid);
+      btn.classList.add("active");
+      localStorage.setItem("sh_wish", JSON.stringify(wishItems));
+      toast("💛", "Added to wishlist!");
+      postAction("/wishlist/add", pid);
+    }
+    localStorage.setItem("sh_wish", JSON.stringify(wishItems));
+  }
+
+  function openWishlist() {
+    toast("💛", `${wishItems.length} item(s) in wishlist`);
+  }
+
+  // ── cart ──────────────────────────────────────────────────────────────────
+  function addToCart(pid) {
+    if (!cartItems.includes(pid)) {
+      cartItems.push(pid);
+      localStorage.setItem("sh_cart", JSON.stringify(cartItems));
+      postAction("/cart/add", pid);
+    }
+    syncCartCount();
+    toast("🛒", "Added to cart!");
+  }
+
+  function openCart() {
+    toast("🛒", `${cartItems.length} item(s) in cart`);
+  }
+
+  function syncCartCount() {
+    const el = document.getElementById("cartCount");
+    el.textContent = cartItems.length;
+    el.classList.toggle("visible", cartItems.length > 0);
+  }
+
+  // ── buy ───────────────────────────────────────────────────────────────────
+  function buyNow(pid) {
+    postAction("/buy", pid);
+    toast("💳", "Order placed! Thank you.");
+  }
+
+  // ── API calls ─────────────────────────────────────────────────────────────
+  async function postAction(endpoint, pid) {
+    const body = { product_id: pid };
+    if (visitorId) body.visitor_id = visitorId;
+    try {
+      const r = await fetch(`${API}${endpoint}`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(body),
+      });
+      const d = await r.json();
+      if (d.visitor_id && !visitorId) {
+        visitorId = d.visitor_id;
+        localStorage.setItem("sh_visitor_id", visitorId);
+      }
+    } catch(e) { console.warn(endpoint, e); }
+  }
+
+  // ── toast ─────────────────────────────────────────────────────────────────
+  function toast(icon, msg) {
+    const stack = document.getElementById("toast-stack");
+    const el    = document.createElement("div");
+    el.className = "toast";
+    el.innerHTML = `<span class="toast-icon">${icon}</span><span>${esc(msg)}</span>`;
+    stack.appendChild(el);
+    setTimeout(() => {
+      el.classList.add("out");
+      el.addEventListener("animationend", () => el.remove(), { once: true });
+    }, 2800);
+  }
+
+  function esc(s) {
+    return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ── init ──────────────────────────────────────────────────────────────────
+  syncCartCount();
+  loadProducts();
+</script>
 </body>
 </html>
