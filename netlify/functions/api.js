@@ -1,48 +1,50 @@
 export async function handler(event) {
-  const path = event.path
-    .replace("/.netlify/functions/api", "")
-    .replace("/api", "");
+  let path = event.path || "/";
+  path = path.replace(/^\/.netlify\/functions\/api/, "");
+  path = path.replace(/^\/api/, "");
+  if (!path.startsWith("/")) path = "/" + path;
+  if (path === "") path = "/";
 
-  const url = `http://paid4.daki.cc:4150${path}`;
+  const qs  = event.rawQuery ? `?${event.rawQuery}` : "";
+  const url = `http://paid4.daki.cc:4150${path}${qs}`;
 
-  const isRedirect =
-    path.startsWith("/login") ||
-    path.startsWith("/callback") ||
-    path.startsWith("/logout") ||
-    path.startsWith("/admin/login") ||
-    path.startsWith("/admin/callback");
+  console.log(`[proxy] ${event.httpMethod} ${path}${qs} → ${url}`);
 
   try {
-    const response = await fetch(url, {
-      method: event.httpMethod,
+    const fetchOpts = {
+      method:   event.httpMethod,
       headers: {
         "Content-Type":    "application/json",
         "X-Forwarded-For": event.headers["x-forwarded-for"] || "",
         "X-User-Agent":    event.headers["user-agent"] || "",
       },
-      body:     event.body || undefined,
       redirect: "manual",
-    });
+    };
+    if (["POST","PUT","PATCH"].includes(event.httpMethod) && event.body) {
+      fetchOpts.body = event.body;
+    }
 
-    // ── Redirect (login/callback flows) ──────────────────────────────────────
-    if ([301, 302, 303].includes(response.status)) {
-      const location = response.headers.get("location") || "/";
+    const response = await fetch(url, fetchOpts);
+
+    if ([301,302,303].includes(response.status)) {
       return {
         statusCode: response.status,
-        headers: { Location: location },
+        headers: { Location: response.headers.get("location") || "/" },
         body: "",
       };
     }
 
-    // ── Normal JSON ───────────────────────────────────────────────────────────
-    const data = await response.json();
+    const text = await response.text();
+    let body = text, contentType = "text/plain";
+    try { JSON.parse(text); contentType = "application/json"; } catch {}
+
     return {
       statusCode: response.status,
-      headers:    { "Content-Type": "application/json" },
-      body:       JSON.stringify(data),
+      headers:    { "Content-Type": contentType },
+      body,
     };
-
   } catch (err) {
+    console.error("[proxy] error:", err.message);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Backend unreachable", detail: err.message }),
