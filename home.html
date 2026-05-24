@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Home</title>
+</head>
+<body>
+  <p id="status">Connecting...</p>
+
+  <script>
+    fetch("/api/hello")
+      .then(r => r.json())
+      .then(d => document.getElementById("status").textContent = d.message)
+      .catch(() => document.getElementById("status").textContent = "Backend unreachable.");
+  </script>
+</body>
+</html>
