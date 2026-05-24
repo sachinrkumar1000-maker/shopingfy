@@ -5,13 +5,12 @@
   <title>Home</title>
 </head>
 <body>
-  <p id="status">Connecting...</p>
+  <p id="status">Loading...</p>
 
   <script>
-    fetch("/api/hello")
-      .then(r => r.json())
-      .then(d => document.getElementById("status").textContent = d.message)
-      .catch(() => document.getElementById("status").textContent = "Backend unreachable.");
+    fetch("/api/visited", { method: "POST" })
+      .then(() => document.getElementById("status").textContent = "Welcome!")
+      .catch(() => document.getElementById("status").textContent = "Welcome!");
   </script>
 </body>
 </html>
