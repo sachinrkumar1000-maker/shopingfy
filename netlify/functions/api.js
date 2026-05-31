@@ -1,53 +1,42 @@
-export async function handler(event) {
-  let path = event.path || "/";
-  path = path.replace(/^\/.netlify\/functions\/api/, "");
-  path = path.replace(/^\/api/, "");
-  if (!path.startsWith("/")) path = "/" + path;
-  if (path === "") path = "/";
+```python
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import resend
 
-  const qs  = event.rawQuery ? `?${event.rawQuery}` : "";
-  const url = `http://paid4.daki.cc:4150${path}${qs}`;
+app = Flask(__name__)
+CORS(app)
 
-  console.log(`[proxy] ${event.httpMethod} ${path}${qs} → ${url}`);
+# Replace with your Resend API key
+resend.api_key = "YOUR_RESEND_API_KEY"
 
-  try {
-    const fetchOpts = {
-      method:   event.httpMethod,
-      headers: {
-        "Content-Type":    "application/json",
-        "X-Forwarded-For": event.headers["x-forwarded-for"] || "",
-        "X-User-Agent":    event.headers["user-agent"] || "",
-      },
-      redirect: "manual",
-    };
-    if (["POST","PUT","PATCH"].includes(event.httpMethod) && event.body) {
-      fetchOpts.body = event.body;
-    }
+@app.route("/")
+def home():
+    return "Backend running"
 
-    const response = await fetch(url, fetchOpts);
+@app.route("/send-email", methods=["POST"])
+def send_email():
+    data = request.get_json()
 
-    if ([301,302,303].includes(response.status)) {
-      return {
-        statusCode: response.status,
-        headers: { Location: response.headers.get("location") || "/" },
-        body: "",
-      };
-    }
+    email = data.get("email")
 
-    const text = await response.text();
-    let body = text, contentType = "text/plain";
-    try { JSON.parse(text); contentType = "application/json"; } catch {}
+    if not email:
+        return jsonify({"error": "Email required"}), 400
 
-    return {
-      statusCode: response.status,
-      headers:    { "Content-Type": contentType },
-      body,
-    };
-  } catch (err) {
-    console.error("[proxy] error:", err.message);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Backend unreachable", detail: err.message }),
-    };
-  }
-}
+    resend.Emails.send({
+        "from": "onboarding@resend.dev",
+        "to": [email],
+        "subject": "Test Email",
+        "html": """
+        <h2>Email Test</h2>
+        <p>Your email was received successfully.</p>
+        """
+    })
+
+    return jsonify({
+        "success": True,
+        "message": f"Email sent to {email}"
+    })
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=4150)
+```
