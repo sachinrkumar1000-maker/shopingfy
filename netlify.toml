@@ -1,4 +1,4 @@
-```toml
+toml
 [build]
   publish = "."
 
@@ -9,4 +9,3 @@
   from = "/api/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
-```
