@@ -2,17 +2,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Email Sender</title>
+    <title>Email Test</title>
 </head>
 <body>
 
-    <h2>Send Test Email</h2>
+    <h2>Send Email Test</h2>
 
     <input
         type="email"
         id="email"
-        placeholder="Enter email address"
-        required
+        placeholder="Enter email"
     >
 
     <button onclick="sendEmail()">
@@ -23,10 +22,11 @@
 
     <script>
         async function sendEmail() {
-            const email = document.getElementById("email").value;
+            const email =
+                document.getElementById("email").value;
 
             const response = await fetch(
-                "https://YOUR-BACKEND-URL/send-email",
+                "/api/send-email",
                 {
                     method: "POST",
                     headers: {
@@ -40,8 +40,8 @@
 
             const data = await response.json();
 
-            document.getElementById("status").innerText =
-                data.message || data.error;
+            document.getElementById("status")
+                .innerText = data.message || data.error;
         }
     </script>
 
